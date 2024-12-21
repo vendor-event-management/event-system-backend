@@ -5,7 +5,6 @@ import (
 	"event-system-backend/pkg/handler"
 	"event-system-backend/pkg/model/dto"
 	"event-system-backend/pkg/service/user"
-	"log"
 	"net/http"
 )
 
@@ -32,7 +31,6 @@ func (as *AuthenticationServiceImpl) Login(data dto.LoginDto) (dto.LoginResponse
 
 	token, errToken := auth.GenerateJWT(*user)
 	if errToken != nil {
-		log.Println("errToken : ", errToken)
 		return response, handler.NewError(http.StatusInternalServerError, errToken.Error())
 	}
 

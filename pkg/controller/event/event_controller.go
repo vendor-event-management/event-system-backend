@@ -2,6 +2,7 @@ package event
 
 import (
 	"event-system-backend/pkg/handler"
+	"event-system-backend/pkg/middleware"
 	"event-system-backend/pkg/model/dto"
 	eventService "event-system-backend/pkg/service/event"
 	"event-system-backend/pkg/utils"
@@ -20,10 +21,17 @@ func NewEventController(eventservice eventService.EventService) *EventController
 
 func SetupEventRoutes(r *gin.RouterGroup, ec *EventController) {
 	healthGroup := r.Group("/event")
+	healthGroup.Use(middleware.AuthMiddleware)
 	healthGroup.POST("", ec.CreateEvent)
 }
 
 func (ec *EventController) CreateEvent(c *gin.Context) {
+	username, exists := c.Get("username")
+	if !exists {
+		c.Error(handler.NewError(http.StatusInternalServerError, "Failed to retrieve username own user"))
+		return
+	}
+
 	var body dto.CreateEventDto
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.Error(handler.NewError(http.StatusInternalServerError, err.Error()))
@@ -50,7 +58,7 @@ func (ec *EventController) CreateEvent(c *gin.Context) {
 		return
 	}
 
-	errEvent := ec.eventservice.CreateEvent(body)
+	errEvent := ec.eventservice.CreateEvent(body, username.(string))
 	if errEvent != nil {
 		c.Error(handler.NewError(errEvent.Code, errEvent.Message))
 		return

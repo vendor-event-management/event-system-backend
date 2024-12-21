@@ -8,8 +8,12 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
+func GetJWTSecret() []byte {
+	return []byte(os.Getenv("JWT_SECRET_KEY"))
+}
+
 func GenerateJWT(user domain.User) (string, error) {
-	secretKey := os.Getenv("JWT_SECRET_KEY")
+	secretKey := GetJWTSecret()
 
 	claims := jwt.MapClaims{
 		"username": user.Username,
@@ -21,7 +25,7 @@ func GenerateJWT(user domain.User) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	signedToken, err := token.SignedString([]byte(secretKey))
+	signedToken, err := token.SignedString(secretKey)
 	if err != nil {
 		return "", err
 	}

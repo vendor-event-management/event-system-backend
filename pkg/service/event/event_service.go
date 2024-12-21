@@ -6,5 +6,5 @@ import (
 )
 
 type EventService interface {
-	CreateEvent(data dto.CreateEventDto) *handler.CustomError
+	CreateEvent(data dto.CreateEventDto, createdByUser string) *handler.CustomError
 }

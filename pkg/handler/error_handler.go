@@ -42,6 +42,7 @@ func ErrorHandler() gin.HandlerFunc {
 			}
 
 			c.JSON(customErr.Code, dto.BaseResponse(false, customErr.Message, nil))
+			c.Abort()
 		}
 	}
 }

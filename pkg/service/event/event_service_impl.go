@@ -19,8 +19,8 @@ func NewEventService(userService user.UserService, eventRepository eventreposito
 	return &EventServiceImpl{userService: userService, eventRepository: eventRepository}
 }
 
-func (e *EventServiceImpl) CreateEvent(data dto.CreateEventDto) *handler.CustomError {
-	user, errUser := e.userService.GetUserByUsernameOrEmail("adinugroho")
+func (e *EventServiceImpl) CreateEvent(data dto.CreateEventDto, createdByUser string) *handler.CustomError {
+	user, errUser := e.userService.GetUserByUsernameOrEmail(createdByUser)
 	if errUser != nil {
 		return handler.NewError(errUser.Code, errUser.Message)
 	}
