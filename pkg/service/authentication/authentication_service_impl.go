@@ -1,1 +1,42 @@
 package authentication
+
+import (
+	"event-system-backend/internal/auth"
+	"event-system-backend/pkg/handler"
+	"event-system-backend/pkg/model/dto"
+	"event-system-backend/pkg/service/user"
+	"log"
+	"net/http"
+)
+
+type AuthenticationServiceImpl struct {
+	userService user.UserService
+}
+
+func NewAuthenticationService(userService user.UserService) AuthenticationService {
+	return &AuthenticationServiceImpl{userService: userService}
+}
+
+func (as *AuthenticationServiceImpl) Login(data dto.LoginDto) (dto.LoginResponse, *handler.CustomError) {
+	var response dto.LoginResponse
+
+	user, errUser := as.userService.GetUserByUsernameOrEmail(data.Username)
+	if errUser != nil {
+		return response, handler.NewError(errUser.Code, errUser.Message)
+	}
+
+	isValid := auth.VerifyPassword(user.Password, data.Password)
+	if !isValid {
+		return response, handler.NewError(http.StatusUnauthorized, "Incorrect password")
+	}
+
+	token, errToken := auth.GenerateJWT(*user)
+	if errToken != nil {
+		log.Println("errToken : ", errToken)
+		return response, handler.NewError(http.StatusInternalServerError, errToken.Error())
+	}
+
+	response.Token = token
+
+	return response, nil
+}

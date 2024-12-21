@@ -21,7 +21,7 @@ func (e *UserServiceImpl) GetUserByUsernameOrEmail(unameOrEmail string) (*domain
 	user, err := e.userRepository.FindByUsername(unameOrEmail)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, handler.NewError(http.StatusNotFound, "User with that username/email are not found")
+			return nil, handler.NewError(http.StatusNotFound, "User not found")
 		}
 		return nil, handler.NewError(http.StatusInternalServerError, err.Error())
 	}

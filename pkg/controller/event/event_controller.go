@@ -26,7 +26,7 @@ func SetupEventRoutes(r *gin.RouterGroup, ec *EventController) {
 func (ec *EventController) CreateEvent(c *gin.Context) {
 	var body dto.CreateEventDto
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.Error(handler.NewError(http.StatusBadRequest, err.Error()))
+		c.Error(handler.NewError(http.StatusInternalServerError, err.Error()))
 		return
 	}
 
