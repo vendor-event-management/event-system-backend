@@ -1,0 +1,2 @@
+ALTER TABLE event_approvals 
+MODIFY COLUMN deleted_at TIMESTAMP DEFAULT NULL;

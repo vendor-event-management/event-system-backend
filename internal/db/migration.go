@@ -26,7 +26,7 @@ func RunMigrations() {
 	}
 
 	err = m.Up()
-	if err != nil {
+	if err != nil && err != migrate.ErrNoChange {
 		log.Fatalf("Migration failed: %v", err)
 	}
 	log.Println("Database migration completed successfully")
