@@ -3,6 +3,7 @@ package authentication
 import (
 	"event-system-backend/pkg/handler"
 	"event-system-backend/pkg/model/dto"
+	"event-system-backend/pkg/model/dto/request"
 	authenticationservice "event-system-backend/pkg/service/authentication"
 	"event-system-backend/pkg/utils"
 	"net/http"
@@ -24,7 +25,7 @@ func SetupAuthenticationRoutes(r *gin.RouterGroup, ac *AuthenticationController)
 }
 
 func (ac *AuthenticationController) Login(c *gin.Context) {
-	var body dto.LoginDto
+	var body request.LoginDto
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.Error(handler.NewError(http.StatusInternalServerError, err.Error()))
 		return

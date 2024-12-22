@@ -4,6 +4,8 @@ import (
 	"event-system-backend/pkg/handler"
 	"event-system-backend/pkg/model/domain"
 	"event-system-backend/pkg/model/dto"
+	"event-system-backend/pkg/model/dto/request"
+	"event-system-backend/pkg/model/dto/response"
 	eventrepository "event-system-backend/pkg/repository/event"
 	"event-system-backend/pkg/service/user"
 	"event-system-backend/pkg/utils"
@@ -19,7 +21,7 @@ func NewEventService(userService user.UserService, eventRepository eventreposito
 	return &EventServiceImpl{userService: userService, eventRepository: eventRepository}
 }
 
-func (e *EventServiceImpl) CreateEvent(data dto.CreateEventDto, createdByUser string) *handler.CustomError {
+func (e *EventServiceImpl) CreateEvent(data request.CreateEventDto, createdByUser string) *handler.CustomError {
 	user, errUser := e.userService.GetUserByUsernameOrEmail(createdByUser)
 	if errUser != nil {
 		return handler.NewError(errUser.Code, errUser.Message)
@@ -54,4 +56,23 @@ func (e *EventServiceImpl) CreateEvent(data dto.CreateEventDto, createdByUser st
 	}
 
 	return nil
+}
+
+func (e *EventServiceImpl) ShowEventsByUserInvolved(userInvolved string, page, size int, nameEvent, status string) (*dto.PaginationResponse, *handler.CustomError) {
+	user, errUser := e.userService.GetUserByUsernameOrEmail(userInvolved)
+	if errUser != nil {
+		return nil, handler.NewError(errUser.Code, errUser.Message)
+	}
+
+	events, totalEvents, errEvent := e.eventRepository.FindAllEventsByUserInvolved(user.ID.String(), user.Role, page, size, nameEvent, status)
+	if errEvent != nil {
+		return nil, handler.NewError(http.StatusInternalServerError, errEvent.Error())
+	}
+
+	response, errResponse := response.BuildEventResponseFromEventScan(events)
+	if errResponse != nil {
+		return nil, handler.NewError(http.StatusInternalServerError, errResponse.Error())
+	}
+
+	return dto.NewPaginationResponse(page, size, int(totalEvents), response), nil
 }

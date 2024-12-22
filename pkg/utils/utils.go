@@ -10,6 +10,16 @@ func IsEmptyString(s string) bool {
 	return strings.TrimSpace(s) == ""
 }
 
+func ParseDates(dates string) ([]string, error) {
+	var dateArray []string
+	err := json.Unmarshal([]byte(dates), &dateArray)
+	if err != nil {
+		return nil, err
+	}
+
+	return dateArray, nil
+}
+
 func ConvertToNullString(s *string) sql.NullString {
 	if s == nil {
 		return sql.NullString{Valid: false}
