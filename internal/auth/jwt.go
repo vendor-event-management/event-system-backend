@@ -16,6 +16,7 @@ func GenerateJWT(user domain.User) (string, error) {
 	secretKey := GetJWTSecret()
 
 	claims := jwt.MapClaims{
+		"id":       user.ID.String(),
 		"username": user.Username,
 		"company":  user.CompanyName,
 		"role":     user.Role,

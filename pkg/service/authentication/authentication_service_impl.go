@@ -20,7 +20,7 @@ func NewAuthenticationService(userService user.UserService) AuthenticationServic
 func (as *AuthenticationServiceImpl) Login(data request.LoginDto) (response.LoginResponse, *handler.CustomError) {
 	var response response.LoginResponse
 
-	user, errUser := as.userService.GetUserByUsernameOrEmail(data.Username)
+	user, errUser := as.userService.GetUserByIdOrUsernameOrEmail(data.Username)
 	if errUser != nil {
 		return response, handler.NewError(errUser.Code, errUser.Message)
 	}

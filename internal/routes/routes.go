@@ -5,6 +5,7 @@ import (
 	authcontroller "event-system-backend/pkg/controller/authentication"
 	eventcontroller "event-system-backend/pkg/controller/event"
 	healthcheckcontroller "event-system-backend/pkg/controller/health_check"
+	usercontroller "event-system-backend/pkg/controller/user"
 	"event-system-backend/pkg/handler"
 	eventrepository "event-system-backend/pkg/repository/event"
 	userrepository "event-system-backend/pkg/repository/user"
@@ -33,11 +34,13 @@ func Run() {
 
 	eventController := eventcontroller.NewEventController(eventService)
 	authController := authcontroller.NewAuthenticationController(authenticationService)
+	userController := usercontroller.NewUserController(userService)
 
 	api := r.Group("/api")
 	healthcheckcontroller.SetupHealthCheckRoutes(api)
 	eventcontroller.SetupEventRoutes(api, eventController)
 	authcontroller.SetupAuthenticationRoutes(api, authController)
+	usercontroller.SetupUserRoutes(api, userController)
 
 	port := os.Getenv("PORT")
 	log.Printf("Application running on port : %s", port)

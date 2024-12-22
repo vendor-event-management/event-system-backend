@@ -3,6 +3,7 @@ package event
 import (
 	"event-system-backend/pkg/handler"
 	"event-system-backend/pkg/middleware"
+	"event-system-backend/pkg/model/domain"
 	"event-system-backend/pkg/model/dto"
 	"event-system-backend/pkg/model/dto/request"
 	eventService "event-system-backend/pkg/service/event"
@@ -25,7 +26,9 @@ func SetupEventRoutes(r *gin.RouterGroup, ec *EventController) {
 	eventGroup := r.Group("/event")
 	eventGroup.Use(middleware.AuthMiddleware)
 	eventGroup.POST("", ec.CreateEvent)
-	eventGroup.GET("/involved", ec.ShowEventsByUserInvolved)
+	eventGroup.GET("/:eventId", ec.GetDetailEventByID)
+	eventGroup.GET("/by-user/:userId", ec.ShowEventsByUserInvolved)
+	eventGroup.PUT("/:eventId/approval", ec.UpdateEventApprovalStatus)
 }
 
 func (ec *EventController) CreateEvent(c *gin.Context) {
@@ -75,12 +78,7 @@ func (ec *EventController) ShowEventsByUserInvolved(c *gin.Context) {
 	sizeStr := c.DefaultQuery("size", "10")
 	nameStr := c.DefaultQuery("name", "")
 	statusStr := c.DefaultQuery("status", "")
-
-	username, exists := c.Get("username")
-	if !exists {
-		c.Error(handler.NewError(http.StatusInternalServerError, "Failed to retrieve username own user"))
-		return
-	}
+	userId := c.Param("userId")
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
@@ -94,11 +92,51 @@ func (ec *EventController) ShowEventsByUserInvolved(c *gin.Context) {
 		return
 	}
 
-	events, errEvents := ec.eventservice.ShowEventsByUserInvolved(username.(string), page, size, nameStr, statusStr)
+	events, errEvents := ec.eventservice.ShowEventsByUserInvolved(userId, page, size, nameStr, statusStr)
 	if errEvents != nil {
 		c.Error(handler.NewError(errEvents.Code, errEvents.Message))
 		return
 	}
 
 	c.JSON(http.StatusOK, dto.BaseResponse(true, "OK", events))
+}
+
+func (ec *EventController) GetDetailEventByID(c *gin.Context) {
+	eventId := c.Param("eventId")
+
+	event, err := ec.eventservice.GetDetailEventByID(eventId)
+	if err != nil {
+		c.Error(handler.NewError(err.Code, err.Message))
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.BaseResponse(true, "OK", event))
+}
+
+func (ec *EventController) UpdateEventApprovalStatus(c *gin.Context) {
+	var body request.EventApprovalDto
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.Error(handler.NewError(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	eventId := c.Param("eventId")
+	username, exists := c.Get("username")
+	if !exists {
+		c.Error(handler.NewError(http.StatusInternalServerError, "Failed to retrieve username own user"))
+		return
+	}
+
+	if utils.IsEmptyString(body.Status) || (body.Status != string(domain.Approved) && body.Status != string(domain.Rejected)) {
+		c.Error(handler.NewError(http.StatusBadRequest, "Invalid event status request"))
+		return
+	}
+
+	errApproval := ec.eventservice.ApproveOrRejectEvent(eventId, username.(string), body)
+	if errApproval != nil {
+		c.Error(handler.NewError(errApproval.Code, errApproval.Message))
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.BaseResponse(true, "OK", nil))
 }

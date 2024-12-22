@@ -5,6 +5,7 @@ import (
 )
 
 type UserRepository interface {
-	FindByUsername(username string) (*domain.User, error)
+	FindByIdOrUsernameOrEmail(username string) (*domain.User, error)
 	FindOneVendorById(id string) (*domain.User, error)
+	FindAllVendors(name string) ([]domain.User, error)
 }
