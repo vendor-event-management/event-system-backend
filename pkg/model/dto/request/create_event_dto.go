@@ -1,4 +1,4 @@
-package dto
+package request
 
 type CreateEventDto struct {
 	Name          string   `json:"name"`
