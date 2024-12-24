@@ -24,6 +24,19 @@ func SetupUserRoutes(r *gin.RouterGroup, uc *UserController) {
 	userGroup.GET("/vendors", uc.ShowAllVendors)
 }
 
+// ShowAllVendors shows all vendors with optional full name filter
+// @Summary Get all vendors
+// @Description Retrieve the list of all vendors, optionally filtered by full name
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer <your-token-here>"
+// @Param fullName query string false "Filter vendors by full name"
+// @Security BearerAuth
+// @Success 200 {object} dto.Response{data=[]response.VendorsResponse} "Vendors retrieved successfully"
+// @Failure 400 {object} dto.Response "Bad request"
+// @Failure 500 {object} dto.Response "Internal server error"
+// @Router /user/vendors [get]
 func (uc *UserController) ShowAllVendors(c *gin.Context) {
 	fullName := c.DefaultQuery("fullName", "")
 

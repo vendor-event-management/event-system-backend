@@ -18,7 +18,7 @@ func GenerateJWT(user domain.User) (string, error) {
 	claims := jwt.MapClaims{
 		"id":       user.ID.String(),
 		"username": user.Username,
-		"company":  user.CompanyName,
+		"fullName": user.FullName,
 		"role":     user.Role,
 		"exp":      time.Now().Add(time.Hour * 24).Unix(), // expired after 24 hours
 		"iat":      time.Now().Unix(),                     // issued at current time

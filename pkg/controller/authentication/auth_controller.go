@@ -24,6 +24,17 @@ func SetupAuthenticationRoutes(r *gin.RouterGroup, ac *AuthenticationController)
 	authGroup.POST("/login", ac.Login)
 }
 
+// Login handles user login
+// @Summary User login
+// @Description Login with username and password to obtain authentication token
+// @Accept json
+// @Produce json
+// @Tags Authentication
+// @Param body body request.LoginDto true "User login credentials"
+// @Success 200 {object} dto.Response{data=response.LoginResponse} "Login successful"
+// @Failure 400 {object} dto.Response "Bad request"
+// @Failure 500 {object} dto.Response "Internal server error"
+// @Router /auth/login [post]
 func (ac *AuthenticationController) Login(c *gin.Context) {
 	var body request.LoginDto
 	if err := c.ShouldBindJSON(&body); err != nil {

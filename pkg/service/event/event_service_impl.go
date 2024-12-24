@@ -30,6 +30,11 @@ func (e *EventServiceImpl) CreateEvent(data request.CreateEventDto, createdByUse
 		return handler.NewError(errUser.Code, errUser.Message)
 	}
 
+	errValidate := utils.ValidateDateInArray(data.ProposedDates)
+	if errValidate != nil {
+		return handler.NewError(http.StatusBadRequest, "Invalid proposed date format")
+	}
+
 	proposedDates, errProposedDates := utils.ConvertToJSONString(data.ProposedDates)
 	if errProposedDates != nil {
 		return handler.NewError(http.StatusInternalServerError, errProposedDates.Error())

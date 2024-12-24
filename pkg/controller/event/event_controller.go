@@ -31,6 +31,18 @@ func SetupEventRoutes(r *gin.RouterGroup, ec *EventController) {
 	eventGroup.PUT("/:eventId/approval", ec.UpdateEventApprovalStatus)
 }
 
+// CreateEvent handles the creation of an event
+// @Summary Create a new event
+// @Description Create a new event with the provided details
+// @Tags Event
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer <your-token-here>"
+// @Param body body request.CreateEventDto true "Event data. Propose date format should be ['dd-mm-yyyy', 'dd-mm-yyyy']"
+// @Success 201 {object} dto.Response "Event created successfully"
+// @Failure 400 {object} dto.Response "Bad request: Missing required fields"
+// @Failure 500 {object} dto.Response "Internal server error"
+// @Router /event [post]
 func (ec *EventController) CreateEvent(c *gin.Context) {
 	username, exists := c.Get("username")
 	if !exists {
@@ -73,6 +85,22 @@ func (ec *EventController) CreateEvent(c *gin.Context) {
 	c.JSON(http.StatusCreated, dto.BaseResponse(true, "OK", nil))
 }
 
+// ShowEventsByUserInvolved shows events by user involvement
+// @Summary Show events by user involvement
+// @Description Get the list of events that a user is involved in, with pagination
+// @Tags Event
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer <your-token-here>"
+// @Param userId path string true "User ID"
+// @Param page query int false "Page number" default(1)
+// @Param size query int false "Page size" default(10)
+// @Param name query string false "Event name filter"
+// @Param status query string false "Event status filter"
+// @Success 200 {object} dto.Response{data=dto.PaginationResponse{content=[]response.EventResponse}} "Events retrieved successfully"
+// @Failure 400 {object} dto.Response "Bad request"
+// @Failure 500 {object} dto.Response "Internal server error"
+// @Router /event/by-user/{userId} [get]
 func (ec *EventController) ShowEventsByUserInvolved(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
 	sizeStr := c.DefaultQuery("size", "10")
@@ -101,6 +129,18 @@ func (ec *EventController) ShowEventsByUserInvolved(c *gin.Context) {
 	c.JSON(http.StatusOK, dto.BaseResponse(true, "OK", events))
 }
 
+// GetDetailEventByID retrieves event details by event ID
+// @Summary Get event details by ID
+// @Description Get the details of a specific event by its ID
+// @Tags Event
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer <your-token-here>"
+// @Param eventId path string true "Event ID"
+// @Success 200 {object} dto.Response{data=response.EventDetailResponse} "Event details retrieved successfully"
+// @Failure 400 {object} dto.Response "Bad request"
+// @Failure 500 {object} dto.Response "Internal server error"
+// @Router /event/{eventId} [get]
 func (ec *EventController) GetDetailEventByID(c *gin.Context) {
 	eventId := c.Param("eventId")
 
@@ -113,6 +153,19 @@ func (ec *EventController) GetDetailEventByID(c *gin.Context) {
 	c.JSON(http.StatusOK, dto.BaseResponse(true, "OK", event))
 }
 
+// UpdateEventApprovalStatus updates the approval status of an event
+// @Summary Update the approval status of an event
+// @Description Approve or reject an event by changing its status
+// @Tags Event
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer <your-token-here>"
+// @Param eventId path string true "Event ID"
+// @Param body body request.EventApprovalDto true "Approval data. Status should be 'Approved' or 'Rejected'"
+// @Success 200 {object} dto.Response "Event status updated successfully"
+// @Failure 400 {object} dto.Response "Bad request: Invalid status"
+// @Failure 500 {object} dto.Response "Internal server error"
+// @Router /event/{eventId}/approval [put]
 func (ec *EventController) UpdateEventApprovalStatus(c *gin.Context) {
 	var body request.EventApprovalDto
 	if err := c.ShouldBindJSON(&body); err != nil {

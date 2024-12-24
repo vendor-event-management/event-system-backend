@@ -15,16 +15,36 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
+	_ "event-system-backend/docs"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	files "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func Run() {
 	r := gin.Default()
 	r.Use(handler.ErrorHandler())
 
-	db := dbconnection.GetDB()
+	// swagger API
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(files.Handler))
 
+	allowOrigins := os.Getenv("CORS_ALLOW_ORIGINS")
+	allowMethods := os.Getenv("CORS_ALLOW_METHOD")
+
+	// cors configuration
+	config := cors.Config{
+		AllowOrigins:     strings.Split(allowOrigins, ","),
+		AllowMethods:     strings.Split(allowMethods, ","),
+		AllowHeaders:     []string{"*"},
+		AllowCredentials: true,
+	}
+	r.Use(cors.New(config))
+
+	db := dbconnection.GetDB()
 	userRepository := userrepository.NewUserRepository(db)
 	eventRepository := eventrepository.NewEventRepository(db)
 

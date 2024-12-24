@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+var dateFormat string = "02-01-2006"
+
 func IsEmptyString(s string) bool {
 	return strings.TrimSpace(s) == ""
 }
@@ -45,8 +47,7 @@ func ConvertTimeToSQLNullTime(t time.Time) sql.NullTime {
 }
 
 func ConvertStringToTime(dateStr string) (time.Time, error) {
-	format := "02-01-2006"
-	parsedTime, err := time.Parse(format, dateStr)
+	parsedTime, err := time.Parse(dateFormat, dateStr)
 	if err != nil {
 		return time.Time{}, err
 	}
@@ -62,4 +63,16 @@ func ConvertToJSONString(slice []string) (string, error) {
 	}
 
 	return string(result), nil
+}
+
+func ValidateDateInArray(dates []string) error {
+	if len(dates) > 0 {
+		for _, date := range dates {
+			_, errDate := time.Parse(dateFormat, date)
+			if errDate != nil {
+				return errDate
+			}
+		}
+	}
+	return nil
 }
