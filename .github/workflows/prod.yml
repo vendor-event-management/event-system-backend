@@ -8,6 +8,9 @@ on:
 
 jobs:
   build:
+    if: github.event.pull_request.merged == true
+    environment:
+      name: 'Production'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
