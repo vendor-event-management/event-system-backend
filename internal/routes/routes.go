@@ -12,6 +12,7 @@ import (
 	authenticationservice "event-system-backend/pkg/service/authentication"
 	eventservice "event-system-backend/pkg/service/event"
 	userservice "event-system-backend/pkg/service/user"
+	"event-system-backend/pkg/utils"
 	"fmt"
 	"log"
 	"os"
@@ -63,6 +64,10 @@ func Run() {
 	usercontroller.SetupUserRoutes(api, userController)
 
 	port := os.Getenv("PORT")
+	if utils.IsEmptyString(port) {
+		port = "5000"
+	}
+
 	log.Printf("Application running on port : %s", port)
 	if err := r.Run(fmt.Sprintf(":%s", port)); err != nil {
 		log.Fatalf("Failed to run backend")
