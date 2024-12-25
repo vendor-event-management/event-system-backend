@@ -1,10 +1,10 @@
 name: Build and deploy to server
-
 on:
-  push:
-    branches: [master]
   pull_request:
-    branches: [master]
+    types:
+      - closed
+    branches:
+      - master
 
 jobs:
   build:
@@ -17,6 +17,12 @@ jobs:
         with:
           go-version: 1.23
 
+      - name: Install Azure CLI
+        run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+      - name: Login to Azure
+        run: az login --service-principal --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+
       - name: Copy migration files
         run: xcopy /i migrations build\migrations
 
@@ -27,5 +33,6 @@ jobs:
         uses: Azure/webapps-deploy@v2
         with:
           app-name: event-management-system-adi
+          slot-name: 'Production'
           package: build/
           publish-profile: ${{ secrets.AZURE_APP_PUBLISH_PROFILE_PROD }}
